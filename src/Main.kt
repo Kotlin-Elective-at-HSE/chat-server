@@ -52,6 +52,8 @@ object Main {
     @JvmStatic
     fun main(vararg args: String) {
         val server = ChatServer(DEFAULT_PORT).apply {
+            isReuseAddr = true
+
             start()
         }
 
