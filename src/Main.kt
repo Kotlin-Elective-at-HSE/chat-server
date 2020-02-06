@@ -8,7 +8,9 @@ class ChatServer(port: Int) : WebSocketServer(InetSocketAddress(port)) {
     private var nextId = 0
 
     override fun onOpen(connection: WebSocket, handshake: ClientHandshake?) {
-        val id = ++nextId
+        val id = synchronized(this) {
+            ++nextId
+        }
 
         val message = "#$id connected"
         sendToAll(message)
