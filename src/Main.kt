@@ -10,23 +10,21 @@ class ChatServer(port: Int) : WebSocketServer(InetSocketAddress(port)) {
     override fun onOpen(connection: WebSocket, handshake: ClientHandshake?) {
         val id = ++nextId
 
-        println("#$id connected")
+        val message = "#$id connected"
+        sendToAll(message)
+        println(message)
         connection.setAttachment(id)
     }
 
     override fun onClose(connection: WebSocket, code: Int, reason: String?, remote: Boolean) {
-        println("#${connection.getAttachment<Int>()} disconnected")
+        val message = "#${connection.getAttachment<Int>()} disconnected"
+        sendToAll(message)
+        println(message)
     }
 
     override fun onMessage(connection: WebSocket, message: String) {
         val toClientMessage = "${connection.getAttachment<Int>()}: $message"
-
-        connections.filter(WebSocket::isOpen).forEach { openedConnection ->
-            try {
-                openedConnection.send(toClientMessage)
-            } catch (t: Throwable) {
-            }
-        }
+        sendToAll(toClientMessage)
     }
 
     override fun onStart() {
@@ -35,6 +33,15 @@ class ChatServer(port: Int) : WebSocketServer(InetSocketAddress(port)) {
 
     override fun onError(connection: WebSocket, e: Exception?) {
         println("error: $e")
+    }
+
+    private fun sendToAll(message: String) {
+        connections.filter(WebSocket::isOpen).forEach { openedConnection ->
+            try {
+                openedConnection.send(message)
+            } catch (t: Throwable) {
+            }
+        }
     }
 }
 
